@@ -1,1 +1,9 @@
 /* pages/main.wxss */
+/* .center_box{
+    width: 300px;
+    margin: 0 auto;
+} */
+
+/* .camera{
+    border: 1px solid #ff0000;
+} */

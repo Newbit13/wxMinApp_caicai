@@ -1,6 +1,5 @@
 <!--index.wxml-->
 <view class="container">
-123
   <view class="userinfo">
     <block wx:if="{{canIUseOpenData}}">
       <view class="userinfo-avatar" bindtap="bindViewTap">

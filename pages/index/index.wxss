@@ -16,4 +16,10 @@
 
 .usermotto {
   margin-top: 200px;
+  border: 1px solid #000;
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  border-radius: 50%;
+  text-align: center;
 }
