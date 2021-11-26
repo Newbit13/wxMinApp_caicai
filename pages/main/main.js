@@ -22,8 +22,18 @@ Page({
       store = [],
       // startTime = new Date(),
       camera = wx.createCameraContext();
+
     that.listener = camera.onCameraFrame(function (frame) {
       // console.log(frame);
+      if (!that.pxMap) {
+        //用来做视频流大小与canvas的映射
+        that.pxMap = true;
+        // console.log(frame.width);
+        that.canvas.width = frame.width; //480
+        // that.canvas.width = 100;
+        that.canvas.height = frame.height;
+      }
+
       if (frame && app.globalData.movenet) {
         //帧率控制
         store.push(frame);
@@ -55,23 +65,81 @@ Page({
     // 识别点
     const that = this;
     // console.log("object开始");
-    // console.log(object);
     app.globalData.movenet
       .estimatePoses(object)
       .then(function (res) {
         // console.log(res);
         var ctx = that.ctx,
           keypoimts = res[0].keypoints;
-        // console.log(keypoimts);
+        // if (!that.first) {
+        //   that.first = true;
+        //   console.log(keypoimts);
+        // }
         ctx.clearRect(0, 0, that.canvas.width, that.canvas.height);
         that.drawSkevaron(keypoimts);
         that.drawKeypoints(keypoimts);
+        // that.drawKeypoints([{ x: 0, y: 10 }]);
+        // that.drawKeypoints([{ x: 480, y: 10 }]); //该点出现在屏幕的最右边，而此时canvas宽度480，窗口宽度320
+        // that.drawKeypoints([{ x: 100, y: 10 }]);
+
+        that.drawBox(); //画一个框框，用来辅助检测人是否在框内
+        that.drawBoxPeople(keypoimts); //画一个框框，用来圈出人的柱形
       })
       .catch(function (err) {
         console.log(err);
       });
   },
+  drawBox() {
+    const that = this;
+    const w = that.canvas.width;
+    const h = that.canvas.height;
 
+    const point1 = { x: 20, y: 20 };
+    const point2 = { x: w - 20, y: 20 };
+    const point3 = { x: w - 20, y: h - 20 };
+    const point4 = { x: 20, y: h - 20 };
+
+    this.drawSegment(point1, point2);
+    this.drawSegment(point2, point3);
+    this.drawSegment(point3, point4);
+    this.drawSegment(point4, point1);
+  },
+  drawBoxPeople(keypoints) {
+    let len = keypoints.length;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    let o = {
+      minX: w,
+      maxX: 0,
+      minY: h,
+      maxY: 0,
+    };
+    for (let index = 0; index < len; index++) {
+      const point = keypoints[index];
+      if (point.x < o.minX) {
+        o.minX = point.x;
+      }
+      if (point.x > o.maxX) {
+        o.maxX = point.x;
+      }
+      if (point.y < o.minY) {
+        o.minY = point.y;
+      }
+      if (point.y > o.maxY) {
+        o.maxY = point.y;
+      }
+    }
+
+    const point1 = { x: o.minX, y: o.minY };
+    const point2 = { x: o.maxX, y: o.minY };
+    const point3 = { x: o.maxX, y: o.maxY };
+    const point4 = { x: o.minX, y: o.maxY };
+
+    this.drawSegment(point1, point2, "#ccc");
+    this.drawSegment(point2, point3, "#ccc");
+    this.drawSegment(point3, point4, "#ccc");
+    this.drawSegment(point4, point1, "#ccc");
+  },
   drawSkevaron(keypoints, scale = 1) {
     // 关键点连线
     // 头部
@@ -95,7 +163,7 @@ Page({
     this.drawSegment(keypoints[13], keypoints[15]);
   },
 
-  drawSegment(akeypoints, bkeypoints) {
+  drawSegment(akeypoints, bkeypoints, color) {
     // 画线
     // var ax = akeypoints[0],
     //   ay = akeypoints[1],
@@ -109,7 +177,7 @@ Page({
     this.ctx.moveTo(ax, ay);
     this.ctx.lineTo(bx, by);
     this.ctx.lineWidth = 3;
-    this.ctx.strokeStyle = "#ff0000";
+    this.ctx.strokeStyle = color || "#52ecf7";
     this.ctx.stroke();
     this.ctx.restore();
   },
@@ -154,13 +222,18 @@ Page({
         // canvas.height = 640 * dpr
         // ctx.scale(dpr, dpr)
 
-        wx.getSystemInfo({
-          success: function (res) {
-            // console.log(res);
-            canvas.width = res.windowWidth;
-            canvas.height = res.windowHeight;
-          },
-        });
+        // 不管dom大小多少，默认canvas就是300，150
+        // console.log(canvas.width);
+        // console.log(canvas.height);
+        // canvas大小在获取视频流之后设置
+        // wx.getSystemInfo({
+        //   success: function (res) {
+        //     //iphone5 320 screenHeight：568 windowHeight：504 pixelRatio:2 statusBarHeight:20 还有个safeArea
+        //     canvas.width = res.windowWidth;
+        //     canvas.height = res.windowHeight; //这是手机屏幕高度，不是看见的相机高度
+        //   },
+        // });
+
         that.ctx = ctx;
         that.canvas = canvas;
         that.res0 = res[0];

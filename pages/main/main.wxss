@@ -7,3 +7,10 @@
 /* .camera{
     border: 1px solid #ff0000;
 } */
+.full_screen{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+}
