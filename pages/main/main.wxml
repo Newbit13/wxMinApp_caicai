@@ -1,5 +1,6 @@
 <view class="full_screen">
   <!-- <camera device-position="back" flash="off" binderror="error" style="width: 100%; height: 300px;"></camera> -->
-  <canvas id="myCanvas" class="camera canvas" style="width:100%;height:100%;position:absolute;top:0;left:0;z-index:999" type="2d"></canvas>
+  <canvas id="myCanvas" class="camera canvas" style="width:100%;height:100%;position:absolute;top:0;left:0;z-index:1" type="2d"></canvas>
+  <!-- <View>w:{{w}} h:{{h}}</View> -->
   <camera id="camera" class="camera" flash="off" device-position="front" resolution="medium" frame-size="medium" style="width: 100%; height: 100%;"></camera>
 </view>

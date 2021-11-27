@@ -6,6 +6,8 @@ Page({
    */
   data: {
     fps: 50,
+    w:0,
+    h:0,
     // resultFps: 0,
   },
 
@@ -24,14 +26,21 @@ Page({
       camera = wx.createCameraContext();
 
     that.listener = camera.onCameraFrame(function (frame) {
-      // console.log(frame);
       if (!that.pxMap) {
+        that.setData({
+          w:frame.width,
+          h:frame.height,
+        })
+        console.log(frame.width);
+        console.log(frame.height);
         //用来做视频流大小与canvas的映射
         that.pxMap = true;
         // console.log(frame.width);
+        console.log(that.canvas);
         that.canvas.width = frame.width; //480
         // that.canvas.width = 100;
         that.canvas.height = frame.height;
+        // that.canvas.height = frame.height - 200;
       }
 
       if (frame && app.globalData.movenet) {
@@ -78,9 +87,11 @@ Page({
         ctx.clearRect(0, 0, that.canvas.width, that.canvas.height);
         that.drawSkevaron(keypoimts);
         that.drawKeypoints(keypoimts);
-        // that.drawKeypoints([{ x: 0, y: 10 }]);
-        // that.drawKeypoints([{ x: 480, y: 10 }]); //该点出现在屏幕的最右边，而此时canvas宽度480，窗口宽度320
-        // that.drawKeypoints([{ x: 100, y: 10 }]);
+        that.drawKeypoints([{ x: 0, y: 0 }]);
+        that.drawKeypoints([{ x: 0, y: 10 }]);
+        that.drawKeypoints([{ x: 480, y: 10 }]); //该点出现在屏幕的最右边，而此时canvas宽度480，窗口宽度320
+        that.drawKeypoints([{ x: 100, y: 10 }]);
+        that.drawKeypoints([{ x: 480, y: 640 }]);
 
         that.drawBox(); //画一个框框，用来辅助检测人是否在框内
         that.drawBoxPeople(keypoimts); //画一个框框，用来圈出人的柱形
@@ -217,10 +228,11 @@ Page({
         var canvas = res[0].node;
         var ctx = canvas.getContext("2d");
 
-        // var dpr = wx.getSystemInfoSync().pixelRatio
+        var dpr = wx.getSystemInfoSync().pixelRatio
+        // console.log(dpr);
         // canvas.width = 375 * dpr
         // canvas.height = 640 * dpr
-        // ctx.scale(dpr, dpr)
+        // ctx.scale(2, 2)//没用
 
         // 不管dom大小多少，默认canvas就是300，150
         // console.log(canvas.width);
